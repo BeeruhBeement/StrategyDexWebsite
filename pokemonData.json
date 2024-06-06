@@ -1,0 +1,233 @@
+{
+    "generation1": {
+        "beedrill": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "bellsprout": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "bulbasaur": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "charmander": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "charmeleon": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "clefairy": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "cubone": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "diglett": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "doduo": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "dratini": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "farfetchd": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "geodude": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "gloom": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "golbat": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "grimer": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "hitmonchan": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "hitmonlee": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "horsea": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "ivysaur": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "kabuto": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "lickitung": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "machoke": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "magnemite": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "meowth": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "muk": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "nidorina": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "nidorino": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "pikachu": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "psyduck": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "sandshrew": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "seel": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "shellder": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "venonat": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "voltorb": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "vulpix": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        },
+        "weepinbell": {
+            "tier": "su",
+            "su_analysis": "",
+            "iu_analysis": ""
+        }
+    },
+    "generation2": {},
+    "generation3": {},
+    "generation4": {},
+    "generation5": {},
+    "generation6": {},
+    "generation7": {
+        "ditto": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": "<sdimportable>Imposter\nDitto @ Choice Scarf\nAbility: Imposter\nHidden Power: Ground\nEVs: 248 HP / 8 Atk / 252 Def\nImpish Nature\nIVs: 30 Atk\n- Transform</sdimportable>"
+        },
+        "ivysaur": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": "<sdimportable>Knock Off\nIvysaur @ Eviolite\nAbility: Chlorophyll\nEVs: 252 HP / 144 Def / 112 SpD\nBold Nature\n- Knock Off\n- Sludge Bomb\n- Giga Drain\n- Synthesis</sdimportable>"
+        },
+        "lickitung": {
+            "tier": "",
+            "su_analysis": "",
+            "iu_analysis": "<sdimportable>Cleric\nLickitung @ Eviolite\nAbility: Oblivious\nEVs: 248 HP / 8 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Wish\n- Protect\n- Heal Bell\n- Seismic Toss / Knock Off / Dragon Tail\n</sdimportable>"
+        },
+        "pidgeot": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": "<sdimportable>Offensive Defog\nPidgeot @ Leftovers\nAbility: Keen Eye\nEVs: 252 Atk / 4 Def / 252 Spe\nJolly Nature\n- Defog\n- Brave Bird\n- U-turn\n- Roost</sdimportable><sdimportable>Choice Scarf\nPidgeot @ Choice Scarf\nAbility: Keen Eye\nEVs: 252 Atk / 4 Def / 252 Spe\nJolly Nature\n- Brave Bird\n- Return\n- U-turn\n- Defog</sdimportable>"
+        },
+        "raticate": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": "<sdimportable>Swords Dance\nRaticate @ Flame Orb\nAbility: Guts\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Facade\n- Crunch / Stomping Tantrum\n- U-turn / Sucker Punch</sdimportable><sdimportable>Choice Scarf\nRaticate @ Choice Scarf\nAbility: Hustle\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Return\n- U-turn\n- Stomping Tantrum\n- Crunch</sdimportable>Other Options:\nPursuit"
+        },
+        "relicanth": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": "<sdimportable>Choice Band\nRelicanth @ Choice Band\nAbility: Rock Head\nEVs: 252 Atk / 4 Def / 252 Spe\nAdamant Nature\n- Head Smash\n- Waterfall / Aqua Tail\n- Earthquake\n- Zen Headbutt / Double-Edge</sdimportable>"
+        },
+        "staryu": {
+            "tier": "",
+            "su_analysis": "",
+            "iu_analysis": "<sdimportable>Rapid Spin\nStaryu @ Eviolite\nAbility: Natural Cure\nEVs: 248 HP / 252 Def / 8 SpD\nBold Nature\nIVs: 0 Atk\n- Rapid Spin\n- Scald\n- Recover\n- Toxic / Thunder Wave / Ice Beam</sdimportable>"
+        },
+        "wormadam-trash": {
+            "tier": "iu",
+            "su_analysis": "",
+            "iu_analysis": ""
+        }
+    },
+    "generation8": {},
+    "generation9": {}
+}

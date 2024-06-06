@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="pokemon-name"></h1>
+            <div id="generation-display"></div>
+        </div>
+        <div class="buttons">
+            <button id="back-button" aria-label="Back to Index">Back to Index</button>
+            <button id="su-button" aria-label="Show SU Analysis">SU Analysis</button>
+            <button id="iu-button" aria-label="Show IU Analysis">IU Analysis</button>
+        </div>
+        <div class="pokemon-details">
+            <div id="sprite-container">
+                <img id="pokemon-sprite" src="" alt="Pokemon Sprite">
+            </div>
+            <div id="stats-container">
+                <h2>Stats</h2>
+                <ul id="pokemon-stats" role="list">
+                    <!-- Stats will be dynamically added here -->
+                </ul>
+            </div>
+            <div id="typing-container">
+                <h2>Typing</h2>
+                <p id="pokemon-typing"></p>
+            </div>
+            <div id="abilities-container">
+                <h2>Abilities</h2>
+                <p id="pokemon-abilities"></p>
+            </div>
+        </div>
+        <div class="analysis">
+            <h2>Analysis</h2>
+            <div id="su-analysis-container">
+                <h3>SU Analysis</h3>
+                <div id="su-analysis"></div>
+            </div>
+            <div id="iu-analysis-container">
+                <h3>IU Analysis</h3>
+                <div id="iu-analysis"></div>
+            </div>
+        </div>
+    </div>
+    <script src="analysis.js"></script>
+</body>
+</html>
