@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
             // If the Pokémon data has a baseForme property, it means it has alternative forms
             // If it doesn't have a baseForme property, it means it is the base form
-            if (pokemonData && (pokemonData.baseForme || !pokemonData.hasOwnProperty('baseForme'))) {
+            if (pokemonData && (pokemonData.baseForme || !pokemonData.hasOwnProperty('baseForme')) && pokemonData.num > 1) {
                 let spriteUrl;
                 if (pokemonData.spriteName) {
                     const spriteName = pokemonData.spriteName.toLowerCase().replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
