@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const suButton = document.getElementById('su-button');
     const iuButton = document.getElementById('iu-button');
     const generationDisplay = document.getElementById('generation-display');
+    const pokemonTierElement = document.getElementById('pokemon-tier');
 
     // Set the Pokémon name and generation display
     pokemonNameElement.textContent = capitalize(pokemonName);
@@ -33,16 +34,18 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             // Save the data to the pokemonData variable
-            pokemonData = data;
+            const pokemonData = data;
 
             // Check if the analysis data for the Pokemon exists
             if (pokemonData[`generation${generation}`] && pokemonData[`generation${generation}`][pokemonName]) {
+                const pokemonDetails = pokemonData[`generation${generation}`][pokemonName];
+
                 // Parse the SU analysis text
-                const suAnalysisText = pokemonData[`generation${generation}`][pokemonName].su_analysis;
+                const suAnalysisText = pokemonDetails.su_analysis;
                 const suAnalysisContent = parseAnalysisText(suAnalysisText);
 
                 // Parse the IU analysis text
-                const iuAnalysisText = pokemonData[`generation${generation}`][pokemonName].iu_analysis;
+                const iuAnalysisText = pokemonDetails.iu_analysis;
                 const iuAnalysisContent = parseAnalysisText(iuAnalysisText);
 
                 // Function to create analysis boxes
@@ -66,9 +69,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     iuAnalysisContainer.style.display = 'block';
                 });
 
-                // Initially show SU analysis and hide IU analysis
-                suAnalysisContainer.style.display = 'block';
-                iuAnalysisContainer.style.display = 'none';
+                // Initially show analysis of the tier the Pokemon is in by default
+                if (pokemonDetails.tier === 'su') {
+                    suAnalysisContainer.style.display = 'block';
+                    iuAnalysisContainer.style.display = 'none';
+                } else if (pokemonDetails.tier === 'iu') {
+                    suAnalysisContainer.style.display = 'none';
+                    iuAnalysisContainer.style.display = 'block';
+                } else {
+                    suAnalysisContainer.style.display = 'block';
+                    iuAnalysisContainer.style.display = 'none';
+                }
+
+                // Set tier
+                const pokemonTier = pokemonDetails.tier;
+                pokemonTierElement.textContent = pokemonTier ? pokemonTier : 'Other';
             } else {
                 suAnalysis.textContent = 'No SU analysis available.';
                 iuAnalysis.textContent = 'No IU analysis available.';
@@ -78,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error fetching analysis data:', error);
         });
 
-    // Fetch data from PokeAPI
+    // Fetch data from Pokemon Showdown
     fetchPokemonDetails(pokemonName)
         .then(data => {
             if (!data) {
@@ -91,68 +106,106 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data) {
                 // Set sprite
-                sprite.src = data.sprites.front_default;
+                const spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${data.name.toLowerCase().replace(/ /g, '')}.gif`;
+                sprite.src = spriteUrl;
 
                 // Set stats
-                const statsList = data.stats ? data.stats.map(stat => `<li>${capitalize(stat.stat.name)}: ${stat.base_stat}</li>`).join('') : 'Unknown';
+                const statsList = data.baseStats ? Object.entries(data.baseStats).map(([stat, value]) => `<li>${capitalize(stat)}: ${value}</li>`).join('') : 'Unknown';
                 stats.innerHTML = statsList;
 
                 // Set typing
-                const types = data.types ? data.types.map(type => capitalize(type.type.name)).join(' / ') : 'Unknown';
-                typing.textContent = types;
+                const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5'; // Default to 'gen5' if not set
+                const types = data.types ? data.types.map(type => `<img src="types/${selectedTypeIcons}/${type}.png" alt="${capitalize(type)}"></img>`).join(' ') : 'Unknown';
+                typing.innerHTML = types;
 
                 // Set abilities
-                const abilityNames = data.abilities ? data.abilities.map(ability => capitalize(ability.ability.name)).join(', ') : 'Unknown';
+                let abilityNames = 'Unknown';
+                if (data.abilities) {
+                    if (Array.isArray(data.abilities)) {
+                        abilityNames = data.abilities.map(ability => capitalize(ability.name)).join(', ');
+                    } else if (typeof data.abilities === 'object') {
+                        const abilityValues = Object.values(data.abilities);
+                        abilityNames = abilityValues.map(ability => capitalize(ability)).join(', ');
+                    }
+                }
                 abilities.textContent = abilityNames;
+
+                // Attempt to fetch and set the tier from localStorage if available
+                const tierData = localStorage.getItem('tierData');
+                if (tierData) {
+                    const tierDataParsed = JSON.parse(tierData);
+                    const tier = tierDataParsed[`generation${generation}`]?.[pokemonName]?.tier;
+                    if (tier) {
+                        pokemonTierElement.textContent = capitalize(tier);
+                    } else {
+                        pokemonTierElement.textContent = 'Other';
+                    }
+                }
             }
         })
         .catch(error => {
             console.error('Error fetching Pokemon details:', error);
         });
 
-    // Function to fetch Pokemon details from PokeAPI
+    // Function to fetch Pokemon details from Pokemon Showdown
     async function fetchPokemonDetails(pokemonName) {
         try {
-            let response;
-            if (pokemonName.includes('-')) {
-                // Fetch from the pokemon-form endpoint for alternative forms
-                response = await fetch(`https://pokeapi.co/api/v2/pokemon-form/${pokemonName}`);
-            } else {
-                // Fetch from the pokemon endpoint for base forms
-                response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
-            }
-
+            const response = await fetch(`https://play.pokemonshowdown.com/data/pokedex.json`);
             if (!response.ok) {
-                // Fallback to base form data if specific form data is not found
-                const baseFormName = pokemonName.split('-')[0];
-                response = await fetch(`https://pokeapi.co/api/v2/pokemon/${baseFormName}`);
-                if (!response.ok) {
-                    console.error(`Failed to fetch details for ${pokemonName} or its base form.`);
-                    return null;
+                console.error(`Failed to fetch details for ${pokemonName}.`);
+                return null;
+            }
+    
+            const data = await response.json();
+            let pokemonData = data[pokemonName.toLowerCase()];
+    
+            // If the Pokémon data is not found with the original name
+            if (!pokemonData) {
+                // Check if the name contains special characters
+                const hasSpecialChars = /[^a-zA-Z0-9]/.test(pokemonName);
+    
+                // If it has special characters, try removing them
+                if (hasSpecialChars) {
+                    const nameWithoutSpecialChars = pokemonName.replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
+                    pokemonData = data[nameWithoutSpecialChars.toLowerCase()] || null;
+                }
+    
+                // If the Pokémon data is still not found, it might be an alternative form
+                if (!pokemonData && pokemonName.includes('-')) {
+                    const baseFormName = pokemonName.split('-')[0];
+                    pokemonData = data[baseFormName.toLowerCase()] || null;
                 }
             }
-
-            const data = await response.json();
-            return data;
+    
+            if (!pokemonData) {
+                console.error(`No data found for ${pokemonName}.`);
+                return null;
+            }
+    
+            return pokemonData;
         } catch (error) {
             console.error(`Error fetching details for ${pokemonName}:`, error);
             return null;
         }
     }
+    
 
     // Function to parse analysis text
     function parseAnalysisText(analysisText) {
-        const analysisParts = analysisText.split(/(<sdimportable>.*?<\/sdimportable>)/gs);
+        const analysisParts = analysisText.split(/(<sdimportable>.*?<\/sdimportable>|<title>.*?<\/title>)/gs);
         return analysisParts.map(part => {
             if (part.startsWith('<sdimportable>')) {
                 const content = part.replace(/<sdimportable>|<\/sdimportable>/g, '').trim();
                 return content ? `<div class="analysis-box">${content.replace(/\n/g, '<br>')}</div>` : '';
+            } else if (part.startsWith('<title>')) {
+                const content = part.replace(/<title>|<\/title>/g, '').trim();
+                return content ? `<div class="title-box">${content.replace(/\n/g, '<br>')}</div>` : '';
             } else {
                 return part.replace(/\n/g, '<br>');
             }
         });
     }
-
+    
     // Function to capitalize the first letter of each word
     function capitalize(str) {
         return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -185,13 +238,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (statsList) {
         try {
-            if (statsList && statsList !== 'undefined') {
-                const statsJson = JSON.parse(statsList);
+            const statsJson = JSON.parse(statsList);
+            if (Array.isArray(statsJson)) {
                 const statsHtml = statsJson.map(stat => `<li>${capitalize(stat.stat.name)}: ${stat.base_stat}</li>`).join('');
+                stats.innerHTML = statsHtml;
+            } else {
+                // Handle the case where statsJson is not an array
+                const statsEntries = Object.entries(statsJson);
+                const statsHtml = statsEntries.map(([stat, value]) => `<li>${capitalize(stat)}: ${value}</li>`).join('');
                 stats.innerHTML = statsHtml;
             }
         } catch (e) {
             console.error('Error parsing stats JSON:', e);
         }
-    }
+    }    
 });

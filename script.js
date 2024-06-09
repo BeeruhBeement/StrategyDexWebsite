@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
     const generationSelect = document.getElementById('generationSelect');
+    const settingsButton = document.getElementById('settingsButton');
+    const settingsMenu = document.getElementById('settingsMenu');
     const toggleDarkModeButton = document.getElementById('toggleDarkMode');
+    const typeIconsRadioButtons = document.querySelectorAll('input[name="typeIcons"]');
     let pokemonList = [];
     let debounceTimer;
     let tierData;
@@ -19,69 +22,72 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function fetchPokemonList() {
         try {
-            const countResponse = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1');
-            if (!countResponse.ok) {
-                console.error('Failed to fetch Pokémon count.');
-                return;
-            }
-            const countData = await countResponse.json();
-            const totalPokemon = countData.count;
-            const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${totalPokemon}`);
+            const response = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
             if (!response.ok) {
-                console.error('Failed to fetch Pokémon list.');
+                console.error('Failed to fetch Pokémon list from Pokémon Showdown.');
                 return;
             }
             const data = await response.json();
-            pokemonList = data.results.map(pokemon => pokemon.name);
-
-            // Add base names for Silvally and Arceus
-            pokemonList.push('silvally', 'arceus');
-
-            // Manually add alternative forms for Silvally and Arceus
-            const silvallyForms = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'poison', 'psychic', 'rock', 'steel', 'water'];
-            const arceusForms = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'poison', 'psychic', 'rock', 'steel', 'water'];
-            addPokemonForms('silvally', silvallyForms);
-            addPokemonForms('arceus', arceusForms);
+            pokemonList = Object.keys(data).map(pokemon => pokemon.toLowerCase());
         } catch (error) {
             console.error('Error fetching Pokémon list:', error);
         }
     }
 
-    function addPokemonForms(baseName, forms) {
-        for (const form of forms) {
-            const formName = `${baseName}-${form}`;
-            pokemonList.push(formName.toLowerCase());
-        }
-    }
-
-    async function fetchPokemonDetails(pokemonName) {
+    async function fetchPokemonDetails(pokemonName, generation) {
         try {
-            let response;
-            if (pokemonName.includes('-')) {
-                // Fetch from the pokemon-form endpoint for alternative forms
-                response = await fetch(`https://pokeapi.co/api/v2/pokemon-form/${pokemonName}`);
-            } else {
-                // Fetch from the pokemon endpoint for base forms
-                response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
-            }
-
+            const response = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
             if (!response.ok) {
-                // Fallback to base form data if specific form data is not found
-                const baseFormName = pokemonName.split('-')[0];
-                response = await fetch(`https://pokeapi.co/api/v2/pokemon/${baseFormName}`);
-                if (!response.ok) {
-                    console.error(`Failed to fetch details for ${pokemonName} or its base form.`);
-                    return null;
+                console.error('Failed to fetch Pokémon details from Pokémon Showdown.');
+                return null;
+            }
+            const data = await response.json();
+            let pokemonData = data[pokemonName.toLowerCase()] || null;
+    
+            // If the Pokémon data is not found with the original name
+            if (!pokemonData) {
+                // Check if the name contains special characters
+                const hasSpecialChars = /[^a-zA-Z0-9]/.test(pokemonName);
+    
+                // If it has special characters, try removing them
+                if (hasSpecialChars) {
+                    const nameWithoutSpecialChars = pokemonName.replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
+                    pokemonData = data[nameWithoutSpecialChars.toLowerCase()] || null;
+                }
+    
+                // If the Pokémon data is still not found, it might be an alternative form
+                if (!pokemonData && pokemonName.includes('-')) {
+                    const baseFormName = pokemonName.split('-')[0];
+                    pokemonData = data[baseFormName.toLowerCase()] || null;
                 }
             }
-
-            const data = await response.json();
-            return data;
+    
+            // If the Pokémon data has a baseForme property, it means it has alternative forms
+            if (pokemonData && pokemonData.baseForme) {
+                pokemonData = data[pokemonData.baseForme.toLowerCase()] || null;
+            }
+    
+            // Only consider Pokémon whose num value is strictly greater than 0
+            if (pokemonData && pokemonData.num > 0) {
+                let spriteUrl;
+                if (pokemonData.spriteName) {
+                    const spriteName = pokemonData.spriteName.toLowerCase().replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
+                    spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${spriteName}.png`;
+                } else if (!pokemonData.baseForme) {
+                    const nameWithoutSpecialChars = pokemonData.name.toLowerCase().replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
+                    spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${nameWithoutSpecialChars}.png`;
+                }
+                pokemonData.spriteUrl = spriteUrl;
+                return pokemonData;
+            }
+    
+            return null;
         } catch (error) {
-            console.error(`Error fetching details for ${pokemonName}:`, error);
+            console.error(`Error fetching details for ${pokemonName} in generation ${generation}:`, error);
             return null;
         }
     }
+    
 
     async function fetchTierData() {
         try {
@@ -117,50 +123,64 @@ document.addEventListener('DOMContentLoaded', function() {
     async function displaySearchResults(results) {
         let html = '';
         const uniqueResults = new Set(); // Use a Set to store unique Pokémon names
-
+    
         for (const result of results) {
             const pokemonName = result.item;
             if (uniqueResults.has(pokemonName)) continue; // Skip if already processed
             uniqueResults.add(pokemonName);
-
+    
             let pokemonData = await fetchPokemonDetails(pokemonName);
-            if (!pokemonData) {
-                // Fallback to base form data if specific form data is not found
-                const baseFormName = pokemonName.split('-')[0];
-                pokemonData = await fetchPokemonDetails(baseFormName);
-            }
-
+    
             if (pokemonData) {
                 const generation = generationSelect.value;
-                const pokemonTier = tierData[`generation${generation}`][pokemonName]?.tier || 'other';
-                const types = pokemonData.types ? pokemonData.types.map(type => capitalize(type.type.name)).join(' / ') : 'Unknown';
-                const abilities = pokemonData.abilities ? pokemonData.abilities.map(ability => capitalize(ability.ability.name)).join(', ') : 'Unknown';
+                const pokemonTier = tierData[`generation${generation}`][pokemonName]?.tier ? capitalize(tierData[`generation${generation}`][pokemonName].tier) : 'Other';
+                const types = pokemonData.types ? pokemonData.types.map(type => capitalize(type)).join(' / ') : 'Unknown';
+    
+                // Adjusting how abilities are accessed and separated by "/"
+                let abilities = 'Unknown';
+                if (pokemonData.abilities) {
+                    const abilityArray = Object.values(pokemonData.abilities);
+                    abilities = abilityArray.map(ability => capitalize(ability)).join(' / ');
+                }
+    
+                // Set sprite URL
+                const spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${pokemonData.name.toLowerCase().replace(/ /g, '')}.gif`;
+
+                // Set type icons based on selected type icon set
+                const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5'; // Default to 'gen5' if not set
+                const typeIconsHtml = pokemonData.types ? pokemonData.types.map(type => `<img src="types/${selectedTypeIcons}/${type}.png" alt="${capitalize(type)}" class="type-icon-small"></img>`).join(' ') : 'Unknown';
+    
                 html += `
-                    <div class="pokemon" data-pokemon="${pokemonName}" data-types="${types}" data-abilities="${abilities}" data-stats='${JSON.stringify(pokemonData.stats)}'>
-                        <h2>${capitalize(pokemonData.name)}</h2>
-                        <img src="${pokemonData.sprites.front_default}" alt="${pokemonData.name}">
-                        <p>Types: ${types}</p>
+                <div class="pokemon" data-pokemon="${pokemonData.name.toLowerCase()}" data-types="${types}" data-abilities="${abilities}" data-stats='${JSON.stringify(pokemonData.baseStats)}'>
+                    <h2 class="pokemon-name">${capitalize(pokemonData.name)}</h2>
+                    <img src="${spriteUrl}" alt="${pokemonData.name}" class="pokemon-sprite">
+                    <div class="pokemon-details">
+                        <p>Typing: ${typeIconsHtml}</p>
                         <p>Abilities: ${abilities}</p>
                         <p>Tier: ${capitalize(pokemonTier)}</p>
                     </div>
-                `;
+                </div>
+            `;
             }
         }
         searchResults.innerHTML = html;
-    }
+    }    
 
-    function redirectToAnalysis(clickedPokemonName) {
+    function redirectToAnalysis(clickedPokemonName, spriteUrl) {
         const selectedGeneration = generationSelect.value;
         const clickedPokemonElement = document.querySelector(`.pokemon[data-pokemon="${clickedPokemonName}"]`);
         const types = clickedPokemonElement.getAttribute('data-types');
         const abilities = clickedPokemonElement.getAttribute('data-abilities');
         const stats = clickedPokemonElement.getAttribute('data-stats');
-
+    
         localStorage.setItem('selectedGeneration', selectedGeneration);
         localStorage.setItem('pokemonTypes', types);
         localStorage.setItem('pokemonAbilities', abilities);
         localStorage.setItem('pokemonStats', stats);
-
+        localStorage.setItem('tierData', JSON.stringify(tierData));
+        localStorage.setItem('typeIcons', document.querySelector('input[name="typeIcons"]:checked').value);
+        localStorage.setItem('pokemonSprite', spriteUrl); // Store the sprite URL
+    
         window.location.href = `analysis.html?pokemon=${clickedPokemonName}&generation=${selectedGeneration}`;
     }
 
@@ -172,7 +192,21 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleDarkModeButton.setAttribute('aria-pressed', isDarkMode);
     }
 
+    settingsButton.addEventListener('click', function() {
+        settingsMenu.classList.toggle('show-settings');
+    });
+
+    typeIconsRadioButtons.forEach(radioButton => {
+        radioButton.addEventListener('change', function() {
+            const selectedTypeIcons = document.querySelector('input[name="typeIcons"]:checked').value;
+            localStorage.setItem('typeIcons', selectedTypeIcons);
+        });
+    });
+
     function capitalize(str) {
+        if (typeof str !== 'string') {
+            return '';
+        }
         return str.replace(/\b\w/g, char => char.toUpperCase());
     }
 
@@ -201,5 +235,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (darkMode === 'disabled') {
         document.body.classList.remove('dark-mode');
         document.body.classList.add('light-mode');
+    }
+
+    const storedTypeIcons = localStorage.getItem('typeIcons');
+    if (storedTypeIcons) {
+        document.querySelector(`input[name="typeIcons"][value="${storedTypeIcons}"]`).checked = true;
     }
 });
