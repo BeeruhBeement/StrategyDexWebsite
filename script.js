@@ -63,12 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
     
             // If the Pokémon data has a baseForme property, it means it has alternative forms
-            if (pokemonData && pokemonData.baseForme) {
-                pokemonData = data[pokemonData.baseForme.toLowerCase()] || null;
-            }
-    
-            // Only consider Pokémon whose num value is strictly greater than 0
-            if (pokemonData && pokemonData.num > 0) {
+            // If it doesn't have a baseForme property, it means it is the base form
+            if (pokemonData && (pokemonData.baseForme || !pokemonData.hasOwnProperty('baseForme'))) {
                 let spriteUrl;
                 if (pokemonData.spriteName) {
                     const spriteName = pokemonData.spriteName.toLowerCase().replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
@@ -86,8 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error(`Error fetching details for ${pokemonName} in generation ${generation}:`, error);
             return null;
         }
-    }
-    
+    }    
 
     async function fetchTierData() {
         try {
