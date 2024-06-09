@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     pokemonData = data[nameWithoutSpecialChars.toLowerCase()] || null;
                 }
     
-                // If the Pokémon data is still not found, it might be an alternative form
+                // If the Pokémon data is siftill not found, it might be an alternative form
                 if (!pokemonData && pokemonName.includes('-')) {
                     const baseFormName = pokemonName.split('-')[0];
                     pokemonData = data[baseFormName.toLowerCase()] || null;
@@ -117,11 +117,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function displaySearchResults(results) {
         let html = '';
-        const uniqueResults = new Set(); // Use a Set to store unique Pokémon names
+        const uniqueResults = new Set();
     
         for (const result of results) {
             const pokemonName = result.item;
-            if (uniqueResults.has(pokemonName)) continue; // Skip if already processed
+            if (uniqueResults.has(pokemonName)) continue;
             uniqueResults.add(pokemonName);
     
             let pokemonData = await fetchPokemonDetails(pokemonName);
@@ -130,32 +130,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 const generation = generationSelect.value;
                 const pokemonTier = tierData[`generation${generation}`][pokemonName]?.tier ? capitalize(tierData[`generation${generation}`][pokemonName].tier) : 'Other';
                 const types = pokemonData.types ? pokemonData.types.map(type => capitalize(type)).join(' / ') : 'Unknown';
-    
-                // Adjusting how abilities are accessed and separated by "/"
                 let abilities = 'Unknown';
                 if (pokemonData.abilities) {
                     const abilityArray = Object.values(pokemonData.abilities);
                     abilities = abilityArray.map(ability => capitalize(ability)).join(' / ');
                 }
     
-                // Set sprite URL
-                const spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${pokemonData.name.toLowerCase().replace(/ /g, '')}.gif`;
-
-                // Set type icons based on selected type icon set
-                const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5'; // Default to 'gen5' if not set
+                // Set sprite URL based on generation
+                let spriteUrl;
+                if (generation < 6) {
+                    spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${pokemonData.name.toLowerCase().replace(/ /g, '')}.png`;
+                } else {
+                    spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${pokemonData.name.toLowerCase().replace(/ /g, '')}.gif`;
+                }
+    
+                const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5';
                 const typeIconsHtml = pokemonData.types ? pokemonData.types.map(type => `<img src="types/${selectedTypeIcons}/${type}.png" alt="${capitalize(type)}" class="type-icon-small"></img>`).join(' ') : 'Unknown';
     
                 html += `
-                <div class="pokemon" data-pokemon="${pokemonData.name.toLowerCase()}" data-types="${types}" data-abilities="${abilities}" data-stats='${JSON.stringify(pokemonData.baseStats)}'>
-                    <h2 class="pokemon-name">${capitalize(pokemonData.name)}</h2>
-                    <img src="${spriteUrl}" alt="${pokemonData.name}" class="pokemon-sprite">
-                    <div class="pokemon-details">
-                        <p>Typing: ${typeIconsHtml}</p>
-                        <p>Abilities: ${abilities}</p>
-                        <p>Tier: ${capitalize(pokemonTier)}</p>
+                    <div class="pokemon" data-pokemon="${pokemonData.name.toLowerCase()}" data-types="${types}" data-abilities="${abilities}" data-stats='${JSON.stringify(pokemonData.baseStats)}'>
+                        <h2 class="pokemon-name">${capitalize(pokemonData.name)}</h2>
+                        <img src="${spriteUrl}" alt="${pokemonData.name}" class="pokemon-sprite">
+                        <div class="pokemon-details">
+                            <p>Typing: ${typeIconsHtml}</p>
+                            <p>Abilities: ${abilities}</p>
+                            <p>Tier: ${capitalize(pokemonTier)}</p>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
             }
         }
         searchResults.innerHTML = html;

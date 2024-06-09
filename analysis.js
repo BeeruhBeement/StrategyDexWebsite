@@ -95,57 +95,65 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch data from Pokemon Showdown
     fetchPokemonDetails(pokemonName)
-        .then(data => {
-            if (!data) {
-                // Fallback to base form data if specific form data is not found
-                const baseFormName = pokemonName.split('-')[0];
-                return fetchPokemonDetails(baseFormName);
+    fetchPokemonDetails(pokemonName)
+    .then(data => {
+        if (!data) {
+            // Fallback to base form data if specific form data is not found
+            const baseFormName = pokemonName.split('-')[0];
+            return fetchPokemonDetails(baseFormName);
+        }
+        return data;
+    })
+    .then(data => {
+        if (data) {
+            // Set sprite URL based on generation
+            let spriteUrl;
+            if (generation == 5) {
+                spriteUrl = `https://play.pokemonshowdown.com/sprites/gen5ani/${data.name.toLowerCase().replace(/ /g, '')}.gif`;
+            } else if (generation < 5) {
+                spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${data.name.toLowerCase().replace(/ /g, '')}.png`;
+            } else {
+                spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${data.name.toLowerCase().replace(/ /g, '')}.gif`;
             }
-            return data;
-        })
-        .then(data => {
-            if (data) {
-                // Set sprite
-                const spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${data.name.toLowerCase().replace(/ /g, '')}.gif`;
-                sprite.src = spriteUrl;
+            sprite.src = spriteUrl;
 
-                // Set stats
-                const statsList = data.baseStats ? Object.entries(data.baseStats).map(([stat, value]) => `<li>${capitalize(stat)}: ${value}</li>`).join('') : 'Unknown';
-                stats.innerHTML = statsList;
+            // Set stats
+            const statsList = data.baseStats ? Object.entries(data.baseStats).map(([stat, value]) => `<li>${capitalize(stat)}: ${value}</li>`).join('') : 'Unknown';
+            stats.innerHTML = statsList;
 
-                // Set typing
-                const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5'; // Default to 'gen5' if not set
-                const types = data.types ? data.types.map(type => `<img src="types/${selectedTypeIcons}/${type}.png" alt="${capitalize(type)}"></img>`).join(' ') : 'Unknown';
-                typing.innerHTML = types;
+            // Set typing
+            const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5';
+            const types = data.types ? data.types.map(type => `<img src="types/${selectedTypeIcons}/${type}.png" alt="${capitalize(type)}"></img>`).join(' ') : 'Unknown';
+            typing.innerHTML = types;
 
-                // Set abilities
-                let abilityNames = 'Unknown';
-                if (data.abilities) {
-                    if (Array.isArray(data.abilities)) {
-                        abilityNames = data.abilities.map(ability => capitalize(ability.name)).join(', ');
-                    } else if (typeof data.abilities === 'object') {
-                        const abilityValues = Object.values(data.abilities);
-                        abilityNames = abilityValues.map(ability => capitalize(ability)).join(', ');
-                    }
-                }
-                abilities.textContent = abilityNames;
-
-                // Attempt to fetch and set the tier from localStorage if available
-                const tierData = localStorage.getItem('tierData');
-                if (tierData) {
-                    const tierDataParsed = JSON.parse(tierData);
-                    const tier = tierDataParsed[`generation${generation}`]?.[pokemonName]?.tier;
-                    if (tier) {
-                        pokemonTierElement.textContent = capitalize(tier);
-                    } else {
-                        pokemonTierElement.textContent = 'Other';
-                    }
+            // Set abilities
+            let abilityNames = 'Unknown';
+            if (data.abilities) {
+                if (Array.isArray(data.abilities)) {
+                    abilityNames = data.abilities.map(ability => capitalize(ability.name)).join(', ');
+                } else if (typeof data.abilities === 'object') {
+                    const abilityValues = Object.values(data.abilities);
+                    abilityNames = abilityValues.map(ability => capitalize(ability)).join(', ');
                 }
             }
-        })
-        .catch(error => {
-            console.error('Error fetching Pokemon details:', error);
-        });
+            abilities.textContent = abilityNames;
+
+            // Attempt to fetch and set the tier from localStorage if available
+            const tierData = localStorage.getItem('tierData');
+            if (tierData) {
+                const tierDataParsed = JSON.parse(tierData);
+                const tier = tierDataParsed[`generation${generation}`]?.[pokemonName]?.tier;
+                if (tier) {
+                    pokemonTierElement.textContent = capitalize(tier);
+                } else {
+                    pokemonTierElement.textContent = 'Other';
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching Pokemon details:', error);
+    });
 
     // Function to fetch Pokemon details from Pokemon Showdown
     async function fetchPokemonDetails(pokemonName) {
