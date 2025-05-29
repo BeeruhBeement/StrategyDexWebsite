@@ -10,12 +10,9 @@
     <div class="container">
         <div class="header">
             <h1 id="pokemon-name"></h1>
-            <div id="generation-display"></div>
         </div>
         <div class="buttons">
             <button id="back-button" aria-label="Back to Index">Back to Index</button>
-            <button id="su-button" aria-label="Show SU Analysis">SU Analysis</button>
-            <button id="iu-button" aria-label="Show IU Analysis">IU Analysis</button>
         </div>
         <div class="pokemon-details">
             <div id="sprite-container">
@@ -30,22 +27,10 @@
                 <p id="pokemon-typing"></p>
                 <h2>Abilities</h2>
                 <p id="pokemon-abilities"></p>
-                <h2>Tier</h2>
-                <p id="pokemon-tier"></p>
-            </div>
-        </div>
-
-        <div class="analysis">
-            <div id="su-analysis-container">
-                <h3>SU Analysis</h3>
-                <div id="su-analysis"></div>
-            </div>
-            <div id="iu-analysis-container">
-                <h3>IU Analysis</h3>
-                <div id="iu-analysis"></div>
             </div>
         </div>
     </div>
+    <div id="pokemon-movepool" role="list"></div>
     <script src="analysis.js"></script>
 </body>
 </html>

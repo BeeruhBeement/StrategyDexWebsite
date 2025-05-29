@@ -1,28 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
-    const generationSelect = document.getElementById('generationSelect');
     const settingsButton = document.getElementById('settingsButton');
     const settingsMenu = document.getElementById('settingsMenu');
     const toggleDarkModeButton = document.getElementById('toggleDarkMode');
-    const typeIconsRadioButtons = document.querySelectorAll('input[name="typeIcons"]');
     let pokemonList = [];
     let debounceTimer;
-    let tierData;
-
-    async function generateGenerationOptions(selectElement) {
-        const totalGenerations = 9;
-        for (let i = 1; i <= totalGenerations; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = `Generation ${i}`;
-            selectElement.appendChild(option);
-        }
-    }
 
     async function fetchPokemonList() {
         try {
-            const response = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
+            const response = await fetch('https://play.pokeathlon.com/data/pokedex.json');
             if (!response.ok) {
                 console.error('Failed to fetch Pokémon list from Pokémon Showdown.');
                 return;
@@ -34,57 +21,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function fetchPokemonDetails(pokemonName, generation) {
+    async function fetchPokemonDetails(pokemonName) {
         try {
-            const response = await fetch('https://play.pokemonshowdown.com/data/pokedex.json');
+            const response = await fetch('https://play.pokeathlon.com/data/pokedex.json');
             if (!response.ok) {
                 console.error('Failed to fetch Pokémon details from Pokémon Showdown.');
                 return null;
             }
             const data = await response.json();
-            let pokemonData = data[pokemonName.toLowerCase()] || null;
+            const pokemonData = data[toID(pokemonName)];
     
-            // If the Pokémon data is not found with the original name
-            if (!pokemonData) {
-                // Check if the name contains special characters
-                const hasSpecialChars = /[^a-zA-Z0-9]/.test(pokemonName);
-    
-                // If it has special characters, try removing them
-                if (hasSpecialChars) {
-                    const nameWithoutSpecialChars = pokemonName.replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
-                    pokemonData = data[nameWithoutSpecialChars.toLowerCase()] || null;
-                }
-    
-                // If the Pokémon data is siftill not found, it might be an alternative form
-                if (!pokemonData && pokemonName.includes('-')) {
-                    const baseFormName = pokemonName.split('-')[0];
-                    pokemonData = data[baseFormName.toLowerCase()] || null;
-                }
-            }
-    
-            // If the Pokémon data has a baseForme property, it means it has alternative forms
-            // If it doesn't have a baseForme property, it means it is the base form
-            if (pokemonData && (pokemonData.baseForme || !pokemonData.hasOwnProperty('baseForme')) && pokemonData.num > 1) {
-                let spriteUrl;
-                if (pokemonData.spriteName) {
-                    const spriteName = pokemonData.spriteName.toLowerCase().replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
-                    spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${spriteName}.png`;
-                } else if (!pokemonData.baseForme) {
-                    const nameWithoutSpecialChars = pokemonData.name.toLowerCase().replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
-                    spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${nameWithoutSpecialChars}.png`;
-                }
-                pokemonData.spriteUrl = spriteUrl;
-                return pokemonData;
-            }
-    
-            return null;
+            let spriteUrl = getSpriteURL(pokemonData);
+            
+            pokemonData.spriteUrl = spriteUrl;
+            return pokemonData;
         } catch (error) {
-            console.error(`Error fetching details for ${pokemonName} in generation ${generation}:`, error);
+            console.error(`Error fetching details for ${pokemonName}`, error);
             return null;
         }
     }    
 
-    async function fetchTierData() {
+    /*async function fetchTierData() {
         try {
             const response = await fetch('pokemonData.json');
             if (!response.ok) {
@@ -95,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error fetching tier data:', error);
         }
-    }
+    }*/
 
     function handleSearchInput() {
         clearTimeout(debounceTimer);
@@ -127,8 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let pokemonData = await fetchPokemonDetails(pokemonName);
     
             if (pokemonData) {
-                const generation = generationSelect.value;
-                const pokemonTier = tierData[`generation${generation}`][pokemonName]?.tier ? capitalize(tierData[`generation${generation}`][pokemonName].tier) : 'Other';
                 const types = pokemonData.types ? pokemonData.types.map(type => capitalize(type)).join(' / ') : 'Unknown';
                 let abilities = 'Unknown';
                 if (pokemonData.abilities) {
@@ -137,15 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
     
                 // Set sprite URL based on generation
-                let spriteUrl;
-                if (generation < 6) {
-                    spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${pokemonData.name.toLowerCase().replace(/ /g, '')}.png`;
-                } else {
-                    spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${pokemonData.name.toLowerCase().replace(/ /g, '')}.gif`;
-                }
+                let spriteUrl = getSpriteURL(pokemonData);
     
-                const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5';
-                const typeIconsHtml = pokemonData.types ? pokemonData.types.map(type => `<img src="types/${selectedTypeIcons}/${type}.png" alt="${capitalize(type)}" class="type-icon-small"></img>`).join(' ') : 'Unknown';
+                const typeIconsHtml = pokemonData.types ? pokemonData.types.map(type => `<img src="https://play.pokeathlon.com/fx/types/${type}.png" alt="${capitalize(type)}" class="type-icon-small"></img>`).join(' ') : 'Unknown';
     
                 html += `
                     <div class="pokemon" data-pokemon="${pokemonData.name.toLowerCase()}" data-types="${types}" data-abilities="${abilities}" data-stats='${JSON.stringify(pokemonData.baseStats)}'>
@@ -154,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="pokemon-details">
                             <p>Typing: ${typeIconsHtml}</p>
                             <p>Abilities: ${abilities}</p>
-                            <p>Tier: ${capitalize(pokemonTier)}</p>
                         </div>
                     </div>
                 `;
@@ -164,21 +112,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }    
 
     function redirectToAnalysis(clickedPokemonName, spriteUrl) {
-        const selectedGeneration = generationSelect.value;
         const clickedPokemonElement = document.querySelector(`.pokemon[data-pokemon="${clickedPokemonName}"]`);
         const types = clickedPokemonElement.getAttribute('data-types');
         const abilities = clickedPokemonElement.getAttribute('data-abilities');
         const stats = clickedPokemonElement.getAttribute('data-stats');
     
-        localStorage.setItem('selectedGeneration', selectedGeneration);
         localStorage.setItem('pokemonTypes', types);
         localStorage.setItem('pokemonAbilities', abilities);
         localStorage.setItem('pokemonStats', stats);
-        localStorage.setItem('tierData', JSON.stringify(tierData));
-        localStorage.setItem('typeIcons', document.querySelector('input[name="typeIcons"]:checked').value);
+        //localStorage.setItem('tierData', JSON.stringify(tierData));
         localStorage.setItem('pokemonSprite', spriteUrl); // Store the sprite URL
     
-        window.location.href = `analysis.html?pokemon=${clickedPokemonName}&generation=${selectedGeneration}`;
+        window.location.href = `analysis.html?pokemon=${clickedPokemonName}`;
     }
 
     function toggleDarkMode() {
@@ -191,13 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     settingsButton.addEventListener('click', function() {
         settingsMenu.classList.toggle('show-settings');
-    });
-
-    typeIconsRadioButtons.forEach(radioButton => {
-        radioButton.addEventListener('change', function() {
-            const selectedTypeIcons = document.querySelector('input[name="typeIcons"]:checked').value;
-            localStorage.setItem('typeIcons', selectedTypeIcons);
-        });
     });
 
     function capitalize(str) {
@@ -219,14 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     toggleDarkModeButton.addEventListener('click', toggleDarkMode);
 
-    fetchTierData();
+    //fetchTierData();
     fetchPokemonList();
-    generateGenerationOptions(generationSelect);
-
-    const selectedGeneration = localStorage.getItem('selectedGeneration');
-    if (selectedGeneration) {
-        generationSelect.value = selectedGeneration;
-    }
 
     const darkMode = localStorage.getItem('darkMode');
     if (darkMode === 'disabled') {
@@ -234,8 +166,19 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('light-mode');
     }
 
-    const storedTypeIcons = localStorage.getItem('typeIcons');
-    if (storedTypeIcons) {
-        document.querySelector(`input[name="typeIcons"][value="${storedTypeIcons}"]`).checked = true;
+    function getSpriteURL(entry) {
+        for (const fangame of ['Insurgence', 'Uranium', 'Infinity', 'Infinite Fusion', 'Mariomon', 'Pokeathlon']) {
+            if (entry.tags && entry.tags.includes(fangame)) {
+                return 'https://play.pokeathlon.com/sprites/fangame-sprites/' + toID(fangame) + '/front/' + toID(entry.name) + (fangame === 'Pokeathlon' ? '.gif' : '.png');
+            }
+        }
+        if (entry.baseSpecies && entry.forme) {
+            return 'https://play.pokemonshowdown.com/sprites/gen5/' + toID(entry.baseSpecies) + '-' + toID(entry.forme) + '.png';
+        }
+        return 'https://play.pokemonshowdown.com/sprites/gen5/' + toID(entry.name) + '.png';
+    }
+
+    function toID(text) {
+        return text.toLowerCase().replace(/[^a-z0-9]+/g, '');
     }
 });

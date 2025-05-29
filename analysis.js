@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get the Pokemon name and generation from the URL query parameters
     const params = new URLSearchParams(window.location.search);
     const pokemonName = params.get('pokemon');
-    const generation = params.get('generation');
 
     // Get elements
     const pokemonNameElement = document.getElementById('pokemon-name');
@@ -17,15 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const backButton = document.getElementById('back-button');
     const suButton = document.getElementById('su-button');
     const iuButton = document.getElementById('iu-button');
-    const generationDisplay = document.getElementById('generation-display');
-    const pokemonTierElement = document.getElementById('pokemon-tier');
+    //const pokemonTierElement = document.getElementById('pokemon-tier');
 
     // Set the Pokémon name and generation display
     pokemonNameElement.textContent = capitalize(pokemonName);
-    generationDisplay.textContent = `Generation ${generation}`;
 
     // Fetch analysis data from pokemonData.json
-    fetch('pokemonData.json')
+    /*fetch('pokemonData.json')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch analysis data.');
@@ -82,8 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 // Set tier
-                const pokemonTier = pokemonDetails.tier;
-                pokemonTierElement.textContent = pokemonTier ? pokemonTier : 'Other';
             } else {
                 suAnalysis.textContent = 'No SU analysis available.';
                 iuAnalysis.textContent = 'No IU analysis available.';
@@ -91,10 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error fetching analysis data:', error);
-        });
+        });*/
 
     // Fetch data from Pokemon Showdown
-    fetchPokemonDetails(pokemonName)
     fetchPokemonDetails(pokemonName)
     .then(data => {
         if (!data) {
@@ -107,14 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
         if (data) {
             // Set sprite URL based on generation
-            let spriteUrl;
-            if (generation == 5) {
-                spriteUrl = `https://play.pokemonshowdown.com/sprites/gen5ani/${data.name.toLowerCase().replace(/ /g, '')}.gif`;
-            } else if (generation < 5) {
-                spriteUrl = `https://play.pokemonshowdown.com/sprites/gen${generation}/${data.name.toLowerCase().replace(/ /g, '')}.png`;
-            } else {
-                spriteUrl = `https://play.pokemonshowdown.com/sprites/ani/${data.name.toLowerCase().replace(/ /g, '')}.gif`;
-            }
+            let spriteUrl = getSpriteURL(data);
             sprite.src = spriteUrl;
 
             // Set stats
@@ -123,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Set typing
             const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5';
-            const types = data.types ? data.types.map(type => `<img src="types/${selectedTypeIcons}/${type}.png" alt="${capitalize(type)}"></img>`).join(' ') : 'Unknown';
+            const types = data.types ? data.types.map(type => `<img src="https://play.pokeathlon.com/fx/types/${type}.png" alt="${capitalize(type)}"></img>`).join(' ') : 'Unknown';
             typing.innerHTML = types;
 
             // Set abilities
@@ -138,8 +125,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             abilities.textContent = abilityNames;
 
+            const movepoolElement = document.getElementById('pokemon-movepool');
+
+            fetch('https://play.pokeathlon.com/data/learnsets.json')
+                .then(response => response.json())
+                .then(learnsetData => {
+                    // Try to get exact match
+                    let learnsetEntry = learnsetData[toID(pokemonName)];
+
+                    // If not found, try base form (for alternate forms like "giratina-origin")
+                    if (!learnsetEntry && pokemonName.includes('-')) {
+                        const baseForm = pokemonName.split('-')[0];
+                        learnsetEntry = learnsetData[toID(baseForm)];
+                    }
+
+                    if (learnsetEntry && learnsetEntry.learnset) {
+                        const moveNames = Object.keys(learnsetEntry.learnset)
+                            .map(move => capitalize(move.replace(/-/g, ' ')))  // Replace dashes for readability
+                            .sort();
+
+                        movepoolElement.innerHTML = `<h3>Movepool</h3><ul>${moveNames.map(move => `<li>${move}</li>`).join('')}</ul>`;
+                    } else {
+                        movepoolElement.innerHTML = '<p>No movepool data available.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching learnset data:', error);
+                    movepoolElement.textContent = 'Error loading movepool.';
+                });
+
+
+
             // Attempt to fetch and set the tier from localStorage if available
-            const tierData = localStorage.getItem('tierData');
+            /*const tierData = localStorage.getItem('tierData');
             if (tierData) {
                 const tierDataParsed = JSON.parse(tierData);
                 const tier = tierDataParsed[`generation${generation}`]?.[pokemonName]?.tier;
@@ -148,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     pokemonTierElement.textContent = 'Other';
                 }
-            }
+            }*/
         }
     })
     .catch(error => {
@@ -158,32 +176,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to fetch Pokemon details from Pokemon Showdown
     async function fetchPokemonDetails(pokemonName) {
         try {
-            const response = await fetch(`https://play.pokemonshowdown.com/data/pokedex.json`);
+            const response = await fetch(`https://play.pokeathlon.com/data/pokedex.json`);
             if (!response.ok) {
                 console.error(`Failed to fetch details for ${pokemonName}.`);
                 return null;
             }
     
             const data = await response.json();
-            let pokemonData = data[pokemonName.toLowerCase()];
-    
-            // If the Pokémon data is not found with the original name
-            if (!pokemonData) {
-                // Check if the name contains special characters
-                const hasSpecialChars = /[^a-zA-Z0-9]/.test(pokemonName);
-    
-                // If it has special characters, try removing them
-                if (hasSpecialChars) {
-                    const nameWithoutSpecialChars = pokemonName.replace(/[^a-zA-Z0-9']/g, '').replace(/ /g, '');
-                    pokemonData = data[nameWithoutSpecialChars.toLowerCase()] || null;
-                }
-    
-                // If the Pokémon data is still not found, it might be an alternative form
-                if (!pokemonData && pokemonName.includes('-')) {
-                    const baseFormName = pokemonName.split('-')[0];
-                    pokemonData = data[baseFormName.toLowerCase()] || null;
-                }
-            }
+            const pokemonData = data[toID(pokemonName)];
     
             if (!pokemonData) {
                 console.error(`No data found for ${pokemonName}.`);
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
 
     // Function to parse analysis text
-    function parseAnalysisText(analysisText) {
+    /*function parseAnalysisText(analysisText) {
         const analysisParts = analysisText.split(/(<sdimportable>.*?<\/sdimportable>|<title>.*?<\/title>)/gs);
         return analysisParts.map(part => {
             if (part.startsWith('<sdimportable>')) {
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return part.replace(/\n/g, '<br>');
             }
         });
-    }
+    }*/
     
     // Function to capitalize the first letter of each word
     function capitalize(str) {
@@ -260,4 +260,20 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error parsing stats JSON:', e);
         }
     }    
+
+    function getSpriteURL(entry) {
+        for (const fangame of ['Insurgence', 'Uranium', 'Infinity', 'Mariomon', 'Pokeathlon', 'Infinite Fusion']) {
+            if (entry.tags && entry.tags.includes(fangame)) {
+                return 'https://play.pokeathlon.com/sprites/fangame-sprites/' + toID(fangame) + '/front/' + toID(entry.name) + (fangame === 'Pokeathlon' ? '.gif' : '.png');
+            }
+        }
+        if (entry.baseSpecies && entry.forme) {
+            return 'https://play.pokemonshowdown.com/sprites/gen5/' + toID(entry.baseSpecies) + '-' + toID(entry.forme) + '.png';
+        }
+        return 'https://play.pokemonshowdown.com/sprites/gen5/' + toID(entry.name) + '.png';
+    }
+
+    function toID(text) {
+        return text.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    }
 });
