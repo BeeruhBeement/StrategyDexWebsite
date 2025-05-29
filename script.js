@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const settingsButton = document.getElementById('settingsButton');
     const settingsMenu = document.getElementById('settingsMenu');
     const toggleDarkModeButton = document.getElementById('toggleDarkMode');
+    
+    document.getElementById('randomButton').addEventListener('click', showRandomPokemon);
+
     let pokemonList = [];
     let debounceTimer;
 
@@ -58,11 +61,27 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(async () => {
             const searchTerm = searchInput.value.trim().toLowerCase();
+            const randomButton = document.getElementById('randomButton');
+            const randomLabel = document.getElementById('randomLabel');
+
             if (searchTerm.length >= 2 && /^[a-z-]+$/.test(searchTerm)) {
                 const results = performFuzzySearch(searchTerm);
                 displaySearchResults(results);
+                randomButton.style.display = 'none';
+                randomLabel.style.display = 'none';
+            } else if (searchTerm === '') {
+                if (pokemonList.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * pokemonList.length);
+                    const randomPokemonName = pokemonList[randomIndex];
+                    const fakeFuseResults = [{ item: randomPokemonName }];
+                    await displaySearchResults(fakeFuseResults);
+                    randomButton.style.display = 'inline-block';
+                    randomLabel.style.display = 'block';
+                }
             } else {
                 searchResults.innerHTML = '';
+                randomButton.style.display = 'none';
+                randomLabel.style.display = 'none';
             }
         }, 300);
     }
@@ -158,7 +177,10 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleDarkModeButton.addEventListener('click', toggleDarkMode);
 
     //fetchTierData();
-    fetchPokemonList();
+    fetchPokemonList().then(() => {
+        showRandomPokemon();
+    });
+
 
     const darkMode = localStorage.getItem('darkMode');
     if (darkMode === 'disabled') {
@@ -180,5 +202,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function toID(text) {
         return text.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    }
+
+    async function showRandomPokemon() {
+        if (pokemonList.length === 0) return;
+
+        const randomIndex = Math.floor(Math.random() * pokemonList.length);
+        const randomPokemonName = pokemonList[randomIndex];
+        const fakeFuseResults = [{ item: randomPokemonName }];
+
+        await displaySearchResults(fakeFuseResults);
+
+        document.getElementById('randomButton').style.display = 'inline-block';
+        document.getElementById('randomLabel').style.display = 'block';
     }
 });
