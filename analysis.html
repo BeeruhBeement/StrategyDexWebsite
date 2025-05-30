@@ -14,23 +14,33 @@
         <div class="buttons">
             <button id="back-button" aria-label="Back to Index">Back to Index</button>
         </div>
-        <div class="pokemon-details">
-            <div id="sprite-container">
-                <img id="pokemon-sprite" src="" alt="Pokemon Sprite">
+            <div class="pokemon-details" style="display: flex; gap: 20px; align-items: flex-start;">
+                <div id="sprite-container">
+                    <img id="pokemon-sprite" src="" alt="Pokemon Sprite" style="width: 120px;">
+                </div>
+
+                <div id="pokemon-info">
+                    <div id="pokemon-typing" style="margin-bottom: 10px;"></div>
+
+                    <ul id="pokemon-stats" role="list" style="margin-bottom: 10px;"></ul>
+
+                    <div id="pokemon-abilities" style="margin-top: 10px;"></div>
+                </div>
             </div>
-            <div id="pokemon-stats-container">
-                <h2>Stats</h2>
-                <ul id="pokemon-stats" role="list">
-                    <!-- Stats will be dynamically added here -->
-                </ul>
-                <h2>Typing</h2>
-                <p id="pokemon-typing"></p>
-                <h2>Abilities</h2>
-                <p id="pokemon-abilities"></p>
-            </div>
-        </div>
     </div>
     <div id="pokemon-movepool" role="list"></div>
+    <div id="tooltip" style="
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px;
+        border-radius: 4px;
+        pointer-events: none;
+        font-size: 14px;
+        max-width: 300px;
+        display: none;
+        z-index: 1000;
+    "></div>
     <script src="analysis.js"></script>
 </body>
 </html>

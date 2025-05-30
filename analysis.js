@@ -9,14 +9,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const stats = document.getElementById('pokemon-stats');
     const typing = document.getElementById('pokemon-typing');
     const abilities = document.getElementById('pokemon-abilities');
-    const suAnalysis = document.getElementById('su-analysis');
-    const iuAnalysis = document.getElementById('iu-analysis');
-    const suAnalysisContainer = document.getElementById('su-analysis-container');
-    const iuAnalysisContainer = document.getElementById('iu-analysis-container');
     const backButton = document.getElementById('back-button');
-    const suButton = document.getElementById('su-button');
-    const iuButton = document.getElementById('iu-button');
     //const pokemonTierElement = document.getElementById('pokemon-tier');
+
+    let abilitiesJson = {};
+    let movesJson = {};
+
+    Promise.all([
+        fetch('https://play.pokeathlon.com/data/abilities.json').then(r => r.json()),
+        fetch('https://play.pokeathlon.com/data/moves.json').then(r => r.json())
+    ]).then(([abilitiesData, movesData]) => {
+        abilitiesJson = abilitiesData;
+        movesJson = movesData;
+    });
+
 
     // Set the Pokémon name and generation display
     pokemonNameElement.textContent = capitalize(pokemonName);
@@ -105,11 +111,24 @@ document.addEventListener('DOMContentLoaded', function() {
             sprite.src = spriteUrl;
 
             // Set stats
-            const statsList = data.baseStats ? Object.entries(data.baseStats).map(([stat, value]) => `<li>${capitalize(stat)}: ${value}</li>`).join('') : 'Unknown';
+            const statsList = data.baseStats
+            ? Object.entries(data.baseStats).map(([stat, value]) => {
+                const barColor = getStatColor(value);
+                const barWidth = (value / 255) * 100;
+                return `
+                    <li style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="width: 80px;">${capitalize(stat)}</span>
+                    <span style="width: 40px; text-align: right; margin-right: 10px;">${value}</span>
+                    <div style="flex-grow: 1; height: 12px; border-radius: 4px; overflow: hidden; background: transparent;">
+                        <div style="width: ${barWidth}%; height: 100%; background: ${barColor};"></div>
+                    </div>
+                    </li>`;
+                }).join('')
+            : 'Unknown';
+
             stats.innerHTML = statsList;
 
             // Set typing
-            const selectedTypeIcons = localStorage.getItem('typeIcons') || 'gen5';
             const types = data.types ? data.types.map(type => `<img src="https://play.pokeathlon.com/fx/types/${type}.png" alt="${capitalize(type)}"></img>`).join(' ') : 'Unknown';
             typing.innerHTML = types;
 
@@ -123,7 +142,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     abilityNames = abilityValues.map(ability => capitalize(ability)).join(', ');
                 }
             }
-            abilities.textContent = abilityNames;
+            if (typeof data.abilities === 'object') {
+                const abilityValues = Object.values(data.abilities);
+                abilities.innerHTML = abilityValues.map(abilityName => {
+                    const id = toID(abilityName);
+                    const ability = abilitiesJson[id];  // You'll need to load this JSON
+                    return `<span class="hover-ability" data-id="${id}">${capitalize(abilityName)}</span>`;
+                }).join(', ');
+            }
 
             const movepoolElement = document.getElementById('pokemon-movepool');
 
@@ -133,18 +159,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Try to get exact match
                     let learnsetEntry = learnsetData[toID(pokemonName)];
 
-                    // If not found, try base form (for alternate forms like "giratina-origin")
                     if (!learnsetEntry && pokemonName.includes('-')) {
-                        const baseForm = pokemonName.split('-')[0];
-                        learnsetEntry = learnsetData[toID(baseForm)];
+                        // Try stripping one suffix at a time from the end
+                        const parts = pokemonName.split('-');
+                        for (let i = parts.length - 1; i > 0; i--) {
+                            const partialName = parts.slice(0, i).join('-');
+                            learnsetEntry = learnsetData[toID(partialName)];
+                            if (learnsetEntry) break;
+                        }
+                        // If still not found, fallback to species name only
+                        if (!learnsetEntry) {
+                            learnsetEntry = learnsetData[toID(parts[0])];
+                        }
                     }
 
                     if (learnsetEntry && learnsetEntry.learnset) {
                         const moveNames = Object.keys(learnsetEntry.learnset)
-                            .map(move => capitalize(move.replace(/-/g, ' ')))  // Replace dashes for readability
-                            .sort();
+                            .map(moveID => {
+                                const move = movesJson[toID(moveID)];
+                                const moveName = move ? move.name : capitalize(moveID.replace(/-/g, ' '));
+                                return `<li><span class="hover-move" data-id="${toID(moveID)}">${moveName}</span></li>`;
+                            })
+                            .sort()
+                            .join('');
 
-                        movepoolElement.innerHTML = `<h3>Movepool</h3><ul>${moveNames.map(move => `<li>${move}</li>`).join('')}</ul>`;
+                        movepoolElement.innerHTML = `<h3>Movepool</h3><ul>${moveNames}</ul>`;
                     } else {
                         movepoolElement.innerHTML = '<p>No movepool data available.</p>';
                     }
@@ -153,8 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error fetching learnset data:', error);
                     movepoolElement.textContent = 'Error loading movepool.';
                 });
-
-
 
             // Attempt to fetch and set the tier from localStorage if available
             /*const tierData = localStorage.getItem('tierData');
@@ -276,4 +313,66 @@ document.addEventListener('DOMContentLoaded', function() {
     function toID(text) {
         return text.toLowerCase().replace(/[^a-z0-9]+/g, '');
     }
+
+    function getStatColor(stat) {
+        if (stat <= 100) {
+            const g = Math.floor((stat / 100) * 255);
+            return `rgb(255, ${g}, 0)`; // red to green
+        } else if (stat <= 200) {
+            const b = Math.floor(((stat - 100) / 100) * 255);
+            return `rgb(${255 - b}, 255, ${b})`; // green to light blue
+        } else {
+            const purple = Math.min(255, Math.floor(((stat - 200) / 55) * 255));
+            return `rgb(${200 - purple / 3}, ${100 - purple / 2}, ${200})`; // light blue to purple
+        }
+    }
+
+    function showTooltip(content, x, y) {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.innerHTML = content;
+        tooltip.style.left = x + 10 + 'px';
+        tooltip.style.top = y + 10 + 'px';
+        tooltip.style.display = 'block';
+    }
+
+    function hideTooltip() {
+        document.getElementById('tooltip').style.display = 'none';
+    }
+    
+
+    document.addEventListener('mouseover', function(e) {
+        if (e.target.classList.contains('hover-ability')) {
+            const ability = abilitiesJson[e.target.dataset.id];
+            const html = `
+                <strong>${ability.name}</strong><br>
+                ${ability.desc || ability.shortDesc || "No description."}
+            `;
+            showTooltip(html, e.pageX, e.pageY);
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        if (e.target.classList.contains('hover-ability')) {
+            hideTooltip();
+        }
+    });
+
+    document.addEventListener('mouseover', function(e) {
+        if (e.target.classList.contains('hover-move')) {
+            const move = movesJson[e.target.dataset.id];
+            const html = `
+                <strong>${move.name}</strong><br>
+                <img src=https://play.pokeathlon.com/fx/types/${move.type}.png> <img src=https://play.pokemonshowdown.com/sprites/categories/${move.category}.png><br>
+                <strong>Power:</strong> ${move.basePower ?? '-'}<br>
+                <strong>Accuracy:</strong> ${move.accuracy === true ? '—' : move.accuracy}<br>
+                <strong>PP:</strong> ${move.pp}<br>
+                ${move.desc || move.shortDesc || "No description."}
+            `;
+            showTooltip(html, e.pageX, e.pageY);
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        if (e.target.classList.contains('hover-move')) {
+            hideTooltip();
+        }
+    });
 });

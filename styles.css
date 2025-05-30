@@ -225,3 +225,29 @@ button:hover {
     margin-bottom: 15px;
 }
 
+.stat-bar-container {
+    width: 200px;
+    height: 12px;
+    background: #eee;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.stat-bar-fill {
+    height: 100%;
+}
+
+#pokemon-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+#pokemon-stats li {
+    font-size: 14px;
+}
+
+#pokemon-abilities div {
+    margin-top: 4px;
+    font-weight: 500;
+}
