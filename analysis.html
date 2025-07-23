@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemon Analysis</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -14,19 +15,30 @@
         <div class="buttons">
             <button id="back-button" aria-label="Back to Index">Back to Index</button>
         </div>
-            <div class="pokemon-details" style="display: flex; gap: 20px; align-items: flex-start;">
-                <div id="sprite-container">
-                    <img id="pokemon-sprite" src="" alt="Pokemon Sprite" style="width: 120px;">
-                </div>
-
-                <div id="pokemon-info">
-                    <div id="pokemon-typing" style="margin-bottom: 10px;"></div>
-
-                    <ul id="pokemon-stats" role="list" style="margin-bottom: 10px;"></ul>
-
-                    <div id="pokemon-abilities" style="margin-top: 10px;"></div>
-                </div>
+        <div class="pokemon-details" style="display: flex; align-items: flex-start;">
+            <div id="sprite-container">
+                <img id="pokemon-sprite" src="" alt="Pokemon Sprite" style="width: 120px;">
             </div>
+            <div id="pokemon-info">
+                <div id="pokemon-typing" style="margin-bottom: 10px;"></div>
+                <ul id="pokemon-stats" role="list" style="margin-bottom: 10px;"></ul>
+                <div id="pokemon-abilities" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="analysis-section" class="analysis-section" style="margin:32px 0 0 0; position:relative;">
+        <button id="edit-analysis-btn" style="display:none;position:absolute;top:0;right:0;font-size:12px;padding:4px 10px;z-index:2;">✎ Edit</button>
+        <h2>Analysis</h2>
+        <div id="analysis-content"></div>
+        <div id="analysis-editor" style="display:none;margin-top:8px;">
+            <div style="margin-bottom:8px;">
+                <input id="analysis-author" type="text" placeholder="Your name (for log)" style="width:180px;max-width:40%;margin-right:8px;">
+                <input id="analysis-password" type="password" placeholder="Password" style="width:120px;max-width:30%;">
+            </div>
+            <div id="quill-editor" style="height:200px;background:#fff;color:#222;"></div>
+            <button id="save-analysis-btn">Save</button>
+            <button id="cancel-analysis-btn">Cancel</button>
+        </div>
     </div>
     <div id="pokemon-movepool" role="list"></div>
     <div id="tooltip" style="
@@ -41,6 +53,8 @@
         display: none;
         z-index: 1000;
     "></div>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+    <script src="utils.js"></script>
     <script src="analysis.js"></script>
 </body>
 </html>

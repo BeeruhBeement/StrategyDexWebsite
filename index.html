@@ -3,26 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subzero Strategy Dex</title>
+    <title>Pokéathlon! Dex</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dark-mode">
     <h1>Pokémon Search</h1>
-    <div>
-        <div id="settings">
-            <button id="settingsButton">Settings</button>
-            <div id="settingsMenu">
-                <button id="toggleDarkMode" aria-pressed="false">Toggle Light/Dark Mode</button>
-            </div>
+    <div class="centered-wrapper">
+        <div id="searchBarWrapper">
+            <input type="text" id="searchInput" placeholder="Search Pokémon..." aria-label="Search Pokémon">
         </div>
     </div>
-    <input type="text" id="searchInput" placeholder="Search Pokémon..." aria-label="Search Pokémon">
-    <div class="centered-wrapper">
-        <div id="randomLabel" style="display: none;"><h2>!randpoke</h2></div>
-        <button id="randomButton" style="display: none;">Show Another Random Pokémon</button>
-    </div>
+    <!-- The filter container and its children will be injected by script.js -->
     <div id="searchResults" role="region" aria-live="polite"></div>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+    <script src="utils.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
