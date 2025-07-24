@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Set Pokémon name
     pokemonNameElement.textContent = capitalize(pokemonName);
+    const pokemonTierElement = document.getElementById('pokemon-tier');
+    if (pokemonTierElement) pokemonTierElement.innerHTML = '';
 
     // Fetch chaos mod overrides
     const chaosDataPromise = fetch('https://play.pokeathlon.com/data/teambuilder-tables.json').then(r => r.json()).catch(() => null);
@@ -86,6 +88,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     tierText = `<span style='color:#e0b000;font-weight:bold;'>${chaosData.gen9chaos.tiers[toID(pokemonName)]}</span>`;
                 }
             }
+            // Set tier text under main name
+            if (pokemonTierElement) pokemonTierElement.innerHTML = tierText;
             if (overrideSpecies) data = Object.assign({}, data, overrideSpecies);
             if (!data) return;
 
@@ -118,18 +122,21 @@ document.addEventListener('DOMContentLoaded', function () {
             for (const fg of ['Insurgence', 'Uranium', 'Infinity', 'Mariomon', 'Pokeathlon']) {
                 if (currentFormObj.tags && currentFormObj.tags.includes(fg)) { currentFangame = fg; break; }
             }
-            formsColumn.appendChild(createFormCard(currentFormObj, currentFangame, true));
+            formsColumn.appendChild(createFormCard(currentFormObj, currentFangame, true, chaosData));
 
-            // Stat bars in static <ul>
+            // Stat bars
             const staticStatsUl = document.getElementById('pokemon-stats');
             if (staticStatsUl && currentFormObj.baseStats) {
                 staticStatsUl.innerHTML = '';
+                const statsDiv = document.createElement('div');
+                statsDiv.className = 'stats-bar-list';
                 for (const [stat, value] of Object.entries(currentFormObj.baseStats)) {
                     const statBarHtml = createStatBar(stat, value);
                     const li = document.createElement('li');
                     li.innerHTML = statBarHtml;
-                    staticStatsUl.appendChild(li);
+                    statsDiv.appendChild(li);
                 }
+                staticStatsUl.appendChild(statsDiv);
             }
 
             // Special forms
@@ -154,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         for (const fg of ['Insurgence', 'Uranium', 'Infinity', 'Mariomon', 'Pokeathlon']) {
                             if (specialEntry.tags && specialEntry.tags.includes(fg)) { specialFangame = fg; break; }
                         }
-                        formsColumn.appendChild(createFormCard(specialEntry, specialFangame, false));
+                        formsColumn.appendChild(createFormCard(specialEntry, specialFangame, false, chaosData));
                     }
                 }
             } catch (e) {}
@@ -167,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 detailsContainer.style.justifyContent = 'center';
             }
 
-            // Movepool rendering (current form only)
+            // Movepool rendering
             const movepoolElement = document.getElementById('pokemon-movepool');
             function renderLearnset(learnsetObj) {
                 if (!learnsetObj) {
@@ -444,13 +451,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (typeof move.priority === 'number' && move.priority !== 0) {
                 priorityHtml = `<strong>Priority:</strong> ${move.priority > 0 ? '+' : ''}${move.priority}<br>`;
             }
-            const html = `<strong>${move.name}</strong><br><img src="https://play.pokeathlon.com/fx/types/${move.type}.png"> <img src="https://play.pokemonshowdown.com/sprites/categories/${move.category}.png"><br><strong>Power:</strong> ${power} &nbsp; <strong>Accuracy:</strong> ${accuracy} &nbsp; <strong>PP:</strong> ${pp}</div><div style="font-size:13px;margin-top:2px;opacity:0.75;">${desc}</div></div></li>`;
+            const power = move.basePower ?? '-';
+            const accuracy = move.accuracy === true ? '—' : (move.accuracy ?? '-');
+            const pp = move.pp ?? '-';
+            const desc = move.shortDesc || move.desc || "No description.";
+            const html = `<strong>${move.name}</strong><br><img src="https://play.pokeathlon.com/fx/types/${move.type}.png"> <img src="https://play.pokemonshowdown.com/sprites/categories/${move.category}.png"><br>${priorityHtml}<strong>Power:</strong> ${power} &nbsp; <strong>Accuracy:</strong> ${accuracy} &nbsp; <strong>PP:</strong> ${pp}${flagsHtml}<div style="font-size:13px;margin-top:2px;opacity:0.75;">${desc}</div>`;
             showTooltip(html, e.pageX, e.pageY);
         }
         if (e.target.classList.contains('hover-item')) {
             const item = itemsJson[e.target.dataset.id];
             if (!item) return;
-            const html = `<strong>${item.name}</strong><br><div style="margin-top:4px;">${item.desc || item.shortDesc || "No description."}</div>`;
+            const html = `<strong>${item.name}</strong><br><div style="margin-top:4px;">${item.shortDesc || item.desc || "No description."}</div>`;
             showTooltip(html, e.pageX, e.pageY);
         }
         if ((e.target.id === 'pokemon-sprite' || e.target.classList.contains('pokemon-sprite')) && e.target.hasAttribute('data-fangame')) {
@@ -479,6 +490,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper: create a form card (base or special)
     function createFormCard(entry, fangame, isBase) {
+        // Accept chaosData as 4th argument
+        var chaosData = arguments.length > 3 ? arguments[3] : null;
         // Prepare types as icons
         let types = '???';
         if (entry.types) {
@@ -509,15 +522,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Stats as bars
+        // Stats as bars (wider container)
         const statsList = entry.baseStats
-            ? Object.entries(entry.baseStats).map(([stat, value]) => createStatBar(stat, value)).join('')
+            ? `<div class="stats-bar-list">${Object.entries(entry.baseStats).map(([stat, value]) => createStatBar(stat, value)).join('')}</div>`
             : 'Unknown';
 
         // Required item
         let requiredItemHtml = '';
         if (entry.requiredItem) {
-            requiredItemHtml = `<div style="margin-top:4px;"><strong>Required Item:</strong> <span style="text-decoration:underline;cursor:pointer;">${entry.requiredItem}</span></div>`;
+            const itemId = entry.requiredItem.toLowerCase().replace(/[^a-z0-9]/g, '');
+            requiredItemHtml = `<div style="margin-top:4px;"><strong>Required Item:</strong> <span class="hover-item" data-id="${itemId}" style="text-decoration:underline;cursor:pointer;">${entry.requiredItem}</span></div>`;
         }
 
         // Card container
@@ -536,10 +550,29 @@ document.addEventListener('DOMContentLoaded', function () {
         // Name above sprite
         const nameElem = document.createElement('h2');
         nameElem.textContent = capitalize(entry.name);
-        nameElem.style.margin = '0 0 8px 0';
+        nameElem.style.margin = '0 0 4px 0';
         nameElem.style.fontSize = '1.3em';
         nameElem.style.textAlign = 'center';
         card.appendChild(nameElem);
+
+        // Tier for this form
+        let formTierText = '';
+        if (chaosData && chaosData.gen9chaos) {
+            const entryId = toID(entry.name);
+            if (chaosData.gen9chaos.overrideTier && chaosData.gen9chaos.overrideTier[entryId]) {
+                formTierText = `<span style='color:#e0b000;font-weight:bold;'>${chaosData.gen9chaos.overrideTier[entryId]}</span>`;
+            } else if (chaosData.gen9chaos.tiers && chaosData.gen9chaos.tiers[entryId]) {
+                formTierText = `<span style='color:#e0b000;font-weight:bold;'>${chaosData.gen9chaos.tiers[entryId]}</span>`;
+            }
+        }
+        if (formTierText) {
+            const tierElem = document.createElement('div');
+            tierElem.innerHTML = formTierText;
+            tierElem.style.textAlign = 'center';
+            tierElem.style.fontSize = '1em';
+            tierElem.style.marginBottom = '8px';
+            card.appendChild(tierElem);
+        }
 
         // Sprite row: front/back, shiny/nonshiny
         const spriteRow = document.createElement('div');
@@ -586,7 +619,7 @@ document.addEventListener('DOMContentLoaded', function () {
         spriteRow.appendChild(spriteBackShiny);
         card.appendChild(spriteRow);
 
-        // Required item (with tooltip)
+        // Required item
         if (requiredItemHtml) {
             const reqDiv = document.createElement('div');
             reqDiv.innerHTML = requiredItemHtml;
@@ -612,7 +645,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return card;
     }
 
-    // Helper: create a stat bar (with advanced tooltip stat calculation)
     function createStatBar(stat, value) {
         const STAT_DISPLAY_NAMES = {
             hp: 'HP', atk: 'Attack', def: 'Defense', spa: 'Sp. Atk.', spd: 'Sp. Def.', spe: 'Speed',
@@ -620,57 +652,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const barColor = getStatColor(value);
         const barWidth = (value / 255) * 100;
         const statLabel = STAT_DISPLAY_NAMES[stat] || capitalize(stat);
-        // Advanced tooltip for actual stat calcs
-        function calcStat(stat, base, iv, ev, nature) {
-            if (stat === 'hp') {
-                if (base === 1) return 1;
-                return Math.floor(((2 * base + iv + Math.floor(ev / 4)) * 100) / 100) + 100 + 10;
-            } else {
-                let n = 1.0;
-                if (nature === 'plus') n = 1.1;
-                if (nature === 'minus') n = 0.9;
-                return Math.floor((Math.floor(((2 * base + iv + Math.floor(ev / 4)) * 100) / 100) + 5) * n);
-            }
-        }
-        let tooltip = '';
-        if (["hp", "atk", "def", "spa", "spd", "spe"].includes(stat)) {
-            const base = value;
-            if (stat === "hp") {
-                const min = calcStat("hp", base, 0, 0, "neutral");
-                const neutral = calcStat("hp", base, 31, 0, "neutral");
-                const max = calcStat("hp", base, 31, 252, "neutral");
-                tooltip = `Min (0 IV/EV): ${min}<br>Neutral (31 IV, 0 EV): ${neutral}<br>Max (31 IV, 252 EV): ${max}`;
-            } else {
-                const min = calcStat(stat, base, 0, 0, "minus");
-                const neutral = calcStat(stat, base, 31, 0, "neutral");
-                const maxNeutral = calcStat(stat, base, 31, 252, "neutral");
-                const maxPlus = calcStat(stat, base, 31, 252, "plus");
-                // -1, +1, +2 boosts
-                const maxNeutralM1 = Math.floor(maxNeutral * 2 / 3);
-                const maxPlusM1 = Math.floor(maxPlus * 2 / 3);
-                const maxNeutral1 = Math.floor(maxNeutral * 1.5);
-                const maxPlus1 = Math.floor(maxPlus * 1.5);
-                const maxNeutral2 = maxNeutral * 2;
-                const maxPlus2 = maxPlus * 2;
-                tooltip = `Min (0 IV/EV, -Nature): ${min}<br>` +
-                    `Neutral (31 IV, 0 EV): ${neutral}<br>` +
-                    `Max (31 IV, 252 EV, Neutral): ${maxNeutral}<br>` +
-                    `Max (31 IV, 252 EV, +Nature): ${maxPlus}<br>` +
-                    `Max Neutral -1: ${maxNeutralM1}<br>` +
-                    `Max +Nature -1: ${maxPlusM1}<br>` +
-                    `Max Neutral +1: ${maxNeutral1}<br>` +
-                    `Max +Nature +1: ${maxPlus1}<br>` +
-                    `Max Neutral +2: ${maxNeutral2}<br>` +
-                    `Max +Nature +2: ${maxPlus2}`;
-            }
-        }
         return `
-            <div class="stat-row" style="display:flex;align-items:center;margin-bottom:8px;">
-                <span class="stat-label" data-stat="${stat}" style="display:inline-block;width:90px;min-width:90px;max-width:90px;text-align:left;cursor:pointer;" data-tooltip="${tooltip.replace(/"/g, '&quot;')}">${statLabel}</span>
-                <span style="display:inline-block;width:40px;text-align:right;margin-right:10px;">${value}</span>
-                <span class="stat-bar-container" style="width:300px;height:12px;display:inline-block;vertical-align:middle;border-radius:6px;overflow:hidden;">
-                    <span class="stat-bar-fill" style="display:inline-block;height:100%;width:${barWidth}%;background:${barColor};border-radius:6px;"></span>
-                </span>
+            <div class="stat-row">
+                <span class="stat-label" data-stat="${stat}">${statLabel}</span>
+                <span class="stat-value">${value}</span>
+                <span class="stat-bar-container"><span class="stat-bar-fill" style="width:${barWidth}%;background:${barColor};"></span></span>
             </div>
         `;
     }

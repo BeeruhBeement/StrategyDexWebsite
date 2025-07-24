@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const selectedType = typeSelect.value;
             showAllMode = false;
             let results = [];
-            if (searchTerm.length >= 2 && /^[a-z-]+$/.test(searchTerm)) {
+            if (/^[a-z-]+$/.test(searchTerm)) {
                 results = performSearch(searchTerm, selectedType);
             } else {
                 results = pokemonList.filter(isValidDexEntry).map(name => ({ item: name }));
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     filterContainer.appendChild(fangameSelect);
     if (fangameSelect && fangameSelect.options.length === 0) {
         const fangameList = [
-            'all', 'insurgence', 'uranium', 'infinity', 'mariomon', 'pokeathlon'
+            'all', 'insurgence', 'uranium', 'infinity', 'mariomon', 'pokeathlon', 'infinitefusion'
         ];
         fangameList.forEach(type => {
             const opt = document.createElement('option');
@@ -388,13 +388,15 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
         }
         if (selectedFangame && selectedFangame !== 'all') {
+            const fangameValue = selectedFangame.toLowerCase();
             filtered = filtered.filter(name => {
                 if (!window._pokeGameCache) window._pokeGameCache = {};
                 if (!window._pokeGameCache[name]) {
                     return false;
                 }
-                const fangames = Array.isArray(window._pokeGameCache[name]) ? window._pokeGameCache[name].map(f => f.toLowerCase()) : [String(window._pokeGameCache[name]).toLowerCase()];
-                return fangames.includes(selectedFangame.toLowerCase());
+                // Cache is always array of lowercased strings
+                const fangames = Array.isArray(window._pokeGameCache[name]) ? window._pokeGameCache[name] : [String(window._pokeGameCache[name])];
+                return fangames.includes(fangameValue);
             });
         }
         return filtered.map(name => ({ item: name }));
@@ -432,12 +434,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         for (const name of pokemonList) {
             if (!window._pokeGameCache[name]) {
                 const data = await fetchPokemonDetails(name);
-                if (data && data.fangame) {
-                    if (Array.isArray(data.fangame)) {
-                        window._pokeGameCache[name] = data.fangame.map(f => f.toLowerCase());
-                    } else {
-                        window._pokeGameCache[name] = [String(data.fangame).toLowerCase()];
+                let fangameList = ['insurgence', 'uranium', 'infinity', 'mariomon', 'pokeathlon', 'infinitefusion'];
+                let fangames = [];
+                if (data) {
+                    const spriteUrl = getSpriteURL(data).toLowerCase();
+                    const fangamePathMatch = spriteUrl.match(/fangame-sprites\/([^/]+)/);
+                    if (fangamePathMatch && fangameList.includes(fangamePathMatch[1])) {
+                        fangames.push(fangamePathMatch[1]);
                     }
+                }
+                if (fangames.length > 0) {
+                    window._pokeGameCache[name] = fangames;
                 } else {
                     window._pokeGameCache[name] = ['all'];
                 }
