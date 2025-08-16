@@ -15,7 +15,7 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET || 'changethis'; // Change this
 app.get('/api/analysis/:pokemon', (req, res) => {
     const data = JSON.parse(fs.readFileSync(ANALYSIS_PATH, 'utf8'));
     const key = req.params.pokemon.toLowerCase();
-    // Return only html (no importable)
+    // Return only html
     res.json({ analysis: data[key] ? { html: data[key].html || '' } : { html: '' } });
 });
 
@@ -27,10 +27,10 @@ app.post('/api/analysis/:pokemon', (req, res) => {
     const logData = JSON.parse(fs.readFileSync(LOG_PATH, 'utf8'));
     const key = req.params.pokemon.toLowerCase();
     const prev = data[key] ? { html: data[key].html || '' } : { html: '' };
-    // Save new analysis (no importable)
+    // Save new analysis
     data[key] = { html: html || '' };
     fs.writeFileSync(ANALYSIS_PATH, JSON.stringify(data, null, 2));
-    // Log the edit (no importable)
+    // Log the edit
     logData.log.push({
         pokemon: key,
         author: author || 'Unknown',
