@@ -1,15 +1,15 @@
-// Utility: convert string to ID
+// Convert string to ID
 function toID(text) {
     return text ? text.toLowerCase().replace(/[^a-z0-9]+/g, '') : '';
 }
 
-// Utility: capitalize each word
+// Capitalize each word
 function capitalize(str) {
     if (typeof str !== 'string') return '';
     return str.replace(/(^|[\s\-_])([a-zA-Z])/g, (m, sep, char) => sep + char.toUpperCase());
 }
 
-// Utility: get sprite URL for a Pokémon entry (just pngs, no ani/gif)
+// Get sprite URL for a Pokémon entry
 // type: boolean (false = front, true = back), shiny: boolean
 function getSpriteURL(entry, type = false, shiny = false) {
     if (!entry) return '';
@@ -36,7 +36,7 @@ function getSpriteURL(entry, type = false, shiny = false) {
     return 'https://play.pokemonshowdown.com/sprites/gen5/' + toID(entry.name) + '.png';
 }
 
-// Utility: get stat color for stat bar
+// Get stat color for stat bar
 function getStatColor(stat) {
     if (stat <= 100) {
         const g = Math.floor((stat / 100) * 255);
@@ -50,7 +50,7 @@ function getStatColor(stat) {
     }
 }
 
-// Utility: show tooltip
+// Show tooltip
 function showTooltip(content, x, y) {
     let tooltip = document.getElementById('tooltip');
     if (!tooltip) {

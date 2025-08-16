@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function () {
             card.appendChild(tierElem);
         }
 
-        // Sprite row: front/back, shiny/nonshiny
+        // Sprite row: front/back/shiny/nonshiny
         const spriteRow = document.createElement('div');
         spriteRow.style.display = 'flex';
         spriteRow.style.flexDirection = 'row';
