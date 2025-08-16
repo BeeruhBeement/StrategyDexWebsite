@@ -1,27 +1,2 @@
 {
-  "log": [
-    {
-      "pokemon": "feleng",
-      "author": "Beeruh",
-      "timestamp": "2025-06-22T13:24:33.795Z",
-      "prev": {},
-      "next": {
-        "html": "<p>test</p><p><strong>I added </strong><em>a proper </em><u>text editor</u></p><ol><li data-list=\"ordered\"><span class=\"ql-ui\" contenteditable=\"false\"></span>very cool</li><li data-list=\"bullet\"><span class=\"ql-ui\" contenteditable=\"false\"></span>really awesome</li></ol><div class=\"ql-code-block-container\" spellcheck=\"false\"><div class=\"ql-code-block\">Landorus-Therian @ Flyinium Z  </div><div class=\"ql-code-block\">Ability: Intimidate  </div><div class=\"ql-code-block\">Tera Type: Ground  </div><div class=\"ql-code-block\">EVs: 252 Atk / 4 SpD / 252 Spe  </div><div class=\"ql-code-block\">Jolly Nature  </div><div class=\"ql-code-block\">- Earthquake  </div><div class=\"ql-code-block\">- Fly  </div><div class=\"ql-code-block\">- Knock Off  </div><div class=\"ql-code-block\">- Swords Dance</div></div>",
-        "importable": ""
-      }
-    },
-    {
-      "pokemon": "feleng",
-      "author": "Unknown",
-      "timestamp": "2025-06-22T13:41:30.286Z",
-      "prev": {
-        "html": "<p>test</p><p><strong>I added </strong><em>a proper </em><u>text editor</u></p><ol><li data-list=\"ordered\"><span class=\"ql-ui\" contenteditable=\"false\"></span>very cool</li><li data-list=\"bullet\"><span class=\"ql-ui\" contenteditable=\"false\"></span>really awesome</li></ol><div class=\"ql-code-block-container\" spellcheck=\"false\"><div class=\"ql-code-block\">Landorus-Therian @ Flyinium Z  </div><div class=\"ql-code-block\">Ability: Intimidate  </div><div class=\"ql-code-block\">Tera Type: Ground  </div><div class=\"ql-code-block\">EVs: 252 Atk / 4 SpD / 252 Spe  </div><div class=\"ql-code-block\">Jolly Nature  </div><div class=\"ql-code-block\">- Earthquake  </div><div class=\"ql-code-block\">- Fly  </div><div class=\"ql-code-block\">- Knock Off  </div><div class=\"ql-code-block\">- Swords Dance</div></div>",
-        "importable": ""
-      },
-      "next": {
-        "html": "<h1>Simply incredible</h1><h2>In fact quite unbelievable</h2><p><strong>I </strong>added a <em>proper </em><u>text editor</u></p><ol><li data-list=\"ordered\"><span class=\"ql-ui\" contenteditable=\"false\"></span>very cool</li><li data-list=\"bullet\"><span class=\"ql-ui\" contenteditable=\"false\"></span>really awesome</li></ol><div class=\"ql-code-block-container\" spellcheck=\"false\"><div class=\"ql-code-block\" data-language=\"plain\">Landorus-Therian @ Flyinium Z</div><div class=\"ql-code-block\" data-language=\"plain\">Ability: Intimidate</div><div class=\"ql-code-block\" data-language=\"plain\">Tera Type: Ground</div><div class=\"ql-code-block\" data-language=\"plain\">EVs: 252 Atk / 4 SpD / 252 Spe</div><div class=\"ql-code-block\" data-language=\"plain\">Jolly Nature</div><div class=\"ql-code-block\" data-language=\"plain\">- Earthquake</div><div class=\"ql-code-block\" data-language=\"plain\">- Fly</div><div class=\"ql-code-block\" data-language=\"plain\">- Knock Off</div><div class=\"ql-code-block\" data-language=\"plain\">- Swords Dance</div></div>",
-        "importable": ""
-      }
-    }
-  ]
 }

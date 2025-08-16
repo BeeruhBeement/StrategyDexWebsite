@@ -9,7 +9,7 @@ app.use(express.static(path.join(__dirname)));
 
 const ANALYSIS_PATH = path.join(__dirname, 'api', 'analyses.json');
 const LOG_PATH = path.join(__dirname, 'api', 'analysis-log.json');
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'changeme'; // Change this!
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'changethis'; // Change this
 
 // Get analysis for a Pokémon
 app.get('/api/analysis/:pokemon', (req, res) => {

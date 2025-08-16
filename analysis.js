@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             formsColumn.appendChild(createFormCard(currentFormObj, currentFangame, true, chaosData));
 
+            // This doesn't work
             // Stat bars
             const staticStatsUl = document.getElementById('pokemon-stats');
             if (staticStatsUl && currentFormObj.baseStats) {
@@ -149,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (
                         entry.baseSpecies &&
                         entry.forme &&
-                        (entry.requiredItem || entry.requiredAbility) &&
+                        (entry.requiredItem || entry.requiredAbility || entry.requiredMove) &&
                         toID(entry.baseSpecies) === currentBase &&
                         toID(entry.name) !== toID(data.name)
                     ) {
@@ -246,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 floatContainer.style.bottom = '20px';
                 floatContainer.style.right = '20px';
                 floatContainer.style.zIndex = '1000';
-                floatContainer.style.background = 'rgba(0, 0, 0, 1)';
                 floatContainer.style.border = '1px solid #ccc';
                 floatContainer.style.borderRadius = '8px';
                 floatContainer.style.padding = '10px';
@@ -527,12 +527,13 @@ document.addEventListener('DOMContentLoaded', function () {
             ? `<div class="stats-bar-list">${Object.entries(entry.baseStats).map(([stat, value]) => createStatBar(stat, value)).join('')}</div>`
             : 'Unknown';
 
+        /*
         // Required item
         let requiredItemHtml = '';
         if (entry.requiredItem) {
             const itemId = entry.requiredItem.toLowerCase().replace(/[^a-z0-9]/g, '');
             requiredItemHtml = `<div style="margin-top:4px;"><strong>Required Item:</strong> <span class="hover-item" data-id="${itemId}" style="text-decoration:underline;cursor:pointer;">${entry.requiredItem}</span></div>`;
-        }
+        }*/
 
         // Card container
         const card = document.createElement('div');
@@ -619,12 +620,13 @@ document.addEventListener('DOMContentLoaded', function () {
         spriteRow.appendChild(spriteBackShiny);
         card.appendChild(spriteRow);
 
+        /*
         // Required item
         if (requiredItemHtml) {
             const reqDiv = document.createElement('div');
             reqDiv.innerHTML = requiredItemHtml;
             card.appendChild(reqDiv);
-        }
+        }*/
 
         // Info columns
         const infoFlexHtml = `

@@ -479,7 +479,7 @@ function isValidDexEntry(name) {
     const poke = pokemonRawData[toID(name)];
     if (!poke) return false;
     if (poke.name && poke.name.toLowerCase().startsWith('pokestar')) return false;
-    if (poke.requiredItem || poke.requiredAbility || poke.battleOnly) return false;
+    if (poke.requiredItem || poke.requiredAbility || poke.requiredMove || poke.battleOnly) return false;
     const n = name.toLowerCase();
     if (n.includes('gmax') || n.includes('totem')) return false;
     return true;
