@@ -541,12 +541,12 @@ document.addEventListener('DOMContentLoaded', function () {
         card.style.display = 'flex';
         card.style.flexDirection = 'column';
         card.style.alignItems = 'left';
-        card.style.minWidth = '100%';
+        card.style.minWidth = '60%';
         card.style.maxWidth = '320px';
         card.style.background = 'rgba(255,255,255,0.05)';
         card.style.borderRadius = '12px';
         card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-        card.style.padding = '16px 12px 12px 12px';
+        card.style.padding = '12px 12px 12px 12px';
         card.style.marginBottom = '24px';
 
         // Name above sprite
