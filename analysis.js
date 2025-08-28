@@ -252,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 floatContainer.style.padding = '10px';
                 floatContainer.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
                 floatContainer.style.textAlign = 'center';
+                floatContainer.style.background = 'rgba(85, 55, 195, 1)';
                 const label = document.createElement('div');
                 label.textContent = 'Evolutions';
                 label.style.fontWeight = 'bold';

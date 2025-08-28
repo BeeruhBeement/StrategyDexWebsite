@@ -1,3 +1,13 @@
 body {
-  background-color: gray;
+  background-color: #0A0A1B;
+}
+body {
+  color: white;
+}
+h1 {
+  color: white;
+  text-align: center;
+}
+h2 {
+  color: white;
 }
