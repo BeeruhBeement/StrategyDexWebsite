@@ -164,9 +164,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 18px;
-        margin: 0 auto 20px auto;
-        max-width: 1100px;
-        min-width: 980px;
+        margin: 0 auto 0px auto;
+        max-width: 65%;
         justify-items: center;
     }
     .poke-box {
